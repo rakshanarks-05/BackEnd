@@ -12,8 +12,8 @@ using TaskManagement.Data;
 namespace TaskManagement.Migrations
 {
     [DbContext(typeof(TaskContext))]
-    [Migration("20241026065505_init")]
-    partial class init
+    [Migration("20241103044858_Initial1")]
+    partial class Initial1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,15 +43,38 @@ namespace TaskManagement.Migrations
                     b.Property<string>("city")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("userId")
+                    b.Property<int?>("userId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("userId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[userId] IS NOT NULL");
 
                     b.ToTable("Address");
+                });
+
+            modelBuilder.Entity("TaskManagement.Models.Checklist", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsDone")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TaskId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId");
+
+                    b.ToTable("Checklist");
                 });
 
             modelBuilder.Entity("TaskManagement.Models.TaskItem", b =>
@@ -120,15 +143,50 @@ namespace TaskManagement.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("TaskManagement.Models.UserLogin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserRole")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UsersLogin");
+                });
+
             modelBuilder.Entity("TaskManagement.Models.Address", b =>
                 {
                     b.HasOne("TaskManagement.Models.User", "User")
                         .WithOne("Address")
-                        .HasForeignKey("TaskManagement.Models.Address", "userId")
+                        .HasForeignKey("TaskManagement.Models.Address", "userId");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TaskManagement.Models.Checklist", b =>
+                {
+                    b.HasOne("TaskManagement.Models.TaskItem", "Task")
+                        .WithMany("Checklists")
+                        .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Task");
                 });
 
             modelBuilder.Entity("TaskManagement.Models.TaskItem", b =>
@@ -140,10 +198,14 @@ namespace TaskManagement.Migrations
                     b.Navigation("Assignee");
                 });
 
+            modelBuilder.Entity("TaskManagement.Models.TaskItem", b =>
+                {
+                    b.Navigation("Checklists");
+                });
+
             modelBuilder.Entity("TaskManagement.Models.User", b =>
                 {
-                    b.Navigation("Address")
-                        .IsRequired();
+                    b.Navigation("Address");
 
                     b.Navigation("Tasks");
                 });

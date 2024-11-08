@@ -15,7 +15,7 @@ namespace TaskManagement.Models
         public string Password { get; set; }
         public Address? Address { get; set; }
 
-        public ICollection<TaskItem> Tasks { get; set; }=new List<TaskItem>();
+        public ICollection<TaskItem>? Tasks { get; set; }=new List<TaskItem>();
 
 
 
